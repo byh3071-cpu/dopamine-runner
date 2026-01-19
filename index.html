@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
-  <title>Dopamine Runner: PNG Final 🎲</title>
+  <title>Dopamine Runner: PNG Ver 🎲</title>
   
   <style>
     @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css");
@@ -20,15 +20,17 @@
         transition: background-image 0.5s ease; 
     }
 
-    /* 🔥 [배경 이미지 - PNG 버전 적용] */
-    /* 파일 이름과 배경 테마를 정직하게 매칭했습니다. */
+    /* 🔥 [배경 이미지 - PNG 연결 파트] */
+    /* 기본 배경 */
     body.bg-pink { background-image: url('bg_pink.png') !important; color: #333; }
     body.bg-sky { background-image: url('bg_sky.png') !important; color: #333; }
     body.bg-green { background-image: url('bg_green.png') !important; color: #333; }
+    
+    /* 특수 배경 (글자색 흰색) */
     body.bg-sunset { background-image: url('bg_sunset.png') !important; color: white !important; }
     body.bg-space { background-image: url('bg_space.png') !important; color: white !important; }
-    body.bg-midnight { background-image: url('bg_midnight.png') !important; color: white !important; } /* 심해 */
-    body.bg-aurora { background-image: url('bg_aurora.png') !important; color: white !important; } /* 오로라 */
+    body.bg-midnight { background-image: url('bg_midnight.png') !important; color: white !important; }
+    body.bg-aurora { background-image: url('bg_aurora.png') !important; color: white !important; }
 
     /* 피버 모드 */
     body.fever-mode { background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000) !important; background-size: 400%; animation: rainbowBg 0.5s linear infinite !important; color: white !important; }
@@ -36,11 +38,24 @@
 
     .app{ width: 100%; height: 100%; position:relative; display: flex; flex-direction: column; }
     
-    /* 상단 UI */
-    .top-container { position: relative; margin: 15px; z-index: 20; flex-shrink: 0; display:flex; justify-content: space-between; align-items: flex-start; }
-    .coin-box { background: #FFD700; color: #333; padding: 8px 15px; border-radius: 20px; font-weight: 900; font-size: 15px; box-shadow: 0 4px 5px rgba(0,0,0,0.2); border: 2px solid #fff; display: flex; align-items: center; gap: 5px; }
-    .score-container { background: var(--panel); padding: 8px 15px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: right; display: flex; flex-direction: column; gap: 2px; }
-    .score-row { font-size: 13px; font-weight: bold; color: #666; }
+    /* 📱 [UI 유지] 왼쪽 코인 / 오른쪽 점수판 */
+    .top-container { 
+        position: relative; margin: 15px; z-index: 20; flex-shrink: 0; 
+        display:flex; justify-content: space-between; align-items: flex-start;
+    }
+    
+    .coin-box { 
+        background: #FFD700; color: #333; padding: 8px 15px; border-radius: 20px; 
+        font-weight: 900; font-size: 15px; box-shadow: 0 4px 5px rgba(0,0,0,0.2); 
+        border: 2px solid #fff; display: flex; align-items: center; gap: 5px;
+    }
+
+    .score-container { 
+        background: var(--panel); padding: 8px 15px; border-radius: 15px; 
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: right; 
+        display: flex; flex-direction: column; gap: 2px;
+    }
+    .score-row { font-size: 13px; font-weight: bold; color: #666; display: flex; justify-content: flex-end; align-items: center; }
     .score-row span { font-size: 16px; font-weight: 900; color: var(--ink); margin-left: 5px; }
     .score-row.current span { color: var(--accent); font-size: 18px; }
 
@@ -57,21 +72,20 @@
     .ground{ position: absolute; bottom:0; width: 100%; height: 40px; background: rgba(255,255,255,0.6); border-top: 3px solid rgba(255,255,255,0.8); transition: background 1.5s; }
     body.bg-midnight .ground, body.bg-space .ground, body.bg-aurora .ground, body.bg-sunset .ground { background: rgba(255,255,255,0.15); border-top: 3px solid rgba(255,255,255,0.3); }
 
-    .player { position: absolute; left: 50px; bottom: 40px; width: 80px; height: 80px; z-index: 10; display:flex; align-items:center; justify-content:center; font-size: 55px; transform-origin: bottom center; }
+    /* 캐릭터 */
+    .player { position: absolute; left: 50px; bottom: 40px; width: 80px; height: 80px; z-index: 10; display:flex; align-items:center; justify-content:center; font-size: 55px; transform-origin: center; }
     .player img { width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated; filter: drop-shadow(0 4px 2px rgba(0,0,0,0.2)); }
     .player.giant { transform: scale(1.5); filter: drop-shadow(0 0 15px gold); }
+    
+    /* 🏃 모션 유지: 찌그러짐 방지 */
     .player.running img, .player.running.emoji-char { animation: runWobble 0.3s infinite linear; }
-    .player.spin img, .player.spin.emoji-char { animation: spinPlayer 0.5s ease-out; }
-    .player.landing img, .player.landing.emoji-char { animation: landSquash 0.15s ease-out forwards; }
-    .player.dead { animation: knockback 0.8s forwards ease-out; }
-
     @keyframes runWobble { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
+    
+    .player.spin img, .player.spin.emoji-char { animation: spinPlayer 0.5s ease-out; }
     @keyframes spinPlayer { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    @keyframes landSquash { 0% { transform: scale(1.3, 0.7); } 100% { transform: scale(1, 1); } }
-    @keyframes knockback { 0% { transform: scale(1) rotate(0deg); opacity: 1; } 100% { transform: scale(0.8) rotate(720deg) translate(200px, -200px); opacity: 0; } }
 
-    .trail { position: absolute; width: 80px; height: 80px; opacity: 0.5; pointer-events: none; z-index: 5; filter: grayscale(1) blur(1px); display:flex; align-items:center; justify-content:center; font-size: 55px; }
-    .trail img { width: 100%; height: 100%; object-fit: contain; }
+    .player.dead { animation: knockback 0.8s forwards ease-out; }
+    @keyframes knockback { 0% { transform: scale(1) rotate(0deg); opacity: 1; } 100% { transform: scale(0.8) rotate(720deg) translate(200px, -200px); opacity: 0; } }
 
     .obstacle{ position:absolute; width:50px; height:50px; font-size:40px; display:flex; align-items:center; justify-content:center; }
     .obstacle.bird { animation: fly 0.6s infinite alternate ease-in-out; font-size: 45px; }
@@ -81,14 +95,11 @@
     .item-star { position: absolute; width: 40px; height: 40px; font-size: 35px; z-index: 9; animation: spinStar 2s infinite linear; }
     @keyframes spinStar { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     
-    .dust { position: absolute; width: 40px; height: 20px; background: white; border-radius: 50%; opacity: 0.8; z-index: 5; animation: dustAnim 0.3s forwards; }
-    @keyframes dustAnim { 0% { transform: scale(0.5); opacity: 0.8; } 100% { transform: scale(1.5) translateY(-10px); opacity: 0; } }
     .float-text { position: absolute; font-weight: 900; color: #ffeb3b; font-size: 24px; z-index: 50; text-shadow: 2px 2px 0 #000; animation: floatUp 0.8s forwards; }
     @keyframes floatUp { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-60px) scale(1.2); opacity: 0; } }
     .milestone-text { position: absolute; top: 30%; left: 50%; transform: translate(-50%, -50%); font-size: 40px; font-weight: bold; color: #FFD700; text-shadow: 2px 2px 0 #000; z-index: 50; animation: popFade 1.5s forwards; white-space: nowrap; }
     @keyframes popFade { 0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; } 30% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; } 100% { transform: translate(-50%, -100%) scale(1.5); opacity: 0; } }
 
-    /* 팝업 UI */
     .overlay{ position:absolute; inset:0; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); display:flex; justify-content:center; align-items:center; z-index: 100; }
     .panel{ background: white; padding: 25px; border-radius: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); text-align:center; width: 90%; max-width: 400px; max-height: 90vh; display: flex; flex-direction: column; overflow-y: auto; }
     .hidden { display: none !important; }
@@ -207,7 +218,7 @@
           <button class="btn-secondary" onclick="backToSettings()">⚙️ 설정</button>
           <button class="btn-primary" onclick="restartGame()">🔄 재시작</button>
         </div>
-        <div class="btn-group">
+        <div class="btn-group" style="margin-top:8px;">
             <button class="btn-secondary" onclick="shareScore()">🔗 공유</button>
             <button class="btn-rank" onclick="openRanking()">🏆 랭킹</button>
         </div>
@@ -237,7 +248,7 @@
 </div>
 
 <script>
-  // ⚠️ 본인의 구글 앱스 스크립트 URL 확인
+  // ⚠️ 본인의 구글 앱스 스크립트 URL로 교체 (이미 복사되어 있다면 그대로 두세요)
   const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz4oxlHh4I9KvBj1rlgTdDCxFDrpwMugkfFzNZOMIG1ZzakJb93QD2KVdnmY2LuqOQZ3Q/exec"; 
 
   const player = document.getElementById('player');
@@ -598,6 +609,7 @@
       gameOverOverlay.classList.remove('hidden');
   }
 
+  // --- 랭킹 ---
   function openRanking() { gameOverOverlay.classList.add('hidden'); rankingOverlay.classList.remove('hidden'); loadRank(); }
   function closeRanking() { rankingOverlay.classList.add('hidden'); gameOverOverlay.classList.remove('hidden'); }
   
