@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
-  <title>Dopamine Runner: Final V3 🎲</title>
+  <title>Dopamine Runner: PNG Final 🎲</title>
   
   <style>
     @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css");
@@ -20,14 +20,15 @@
         transition: background-image 0.5s ease; 
     }
 
-    /* 배경 이미지 */
+    /* 🔥 [배경 이미지 - PNG 버전 적용] */
+    /* 파일 이름과 배경 테마를 정직하게 매칭했습니다. */
     body.bg-pink { background-image: url('bg_pink.png') !important; color: #333; }
     body.bg-sky { background-image: url('bg_sky.png') !important; color: #333; }
     body.bg-green { background-image: url('bg_green.png') !important; color: #333; }
     body.bg-sunset { background-image: url('bg_sunset.png') !important; color: white !important; }
     body.bg-space { background-image: url('bg_space.png') !important; color: white !important; }
-    body.bg-midnight { background-image: url('bg_aurora.png') !important; color: white !important; } /* 오로라 */
-    body.bg-aurora { background-image: url('bg_midnight.png') !important; color: white !important; } /* 심해 */
+    body.bg-midnight { background-image: url('bg_midnight.png') !important; color: white !important; } /* 심해 */
+    body.bg-aurora { background-image: url('bg_aurora.png') !important; color: white !important; } /* 오로라 */
 
     /* 피버 모드 */
     body.fever-mode { background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000) !important; background-size: 400%; animation: rainbowBg 0.5s linear infinite !important; color: white !important; }
@@ -76,6 +77,7 @@
     .obstacle.bird { animation: fly 0.6s infinite alternate ease-in-out; font-size: 45px; }
     @keyframes fly { from { transform: translateY(0); } to { transform: translateY(-10px); } }
     body.bg-midnight .obstacle, body.bg-space .obstacle { filter: brightness(1.5); }
+    
     .item-star { position: absolute; width: 40px; height: 40px; font-size: 35px; z-index: 9; animation: spinStar 2s infinite linear; }
     @keyframes spinStar { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     
@@ -86,46 +88,31 @@
     .milestone-text { position: absolute; top: 30%; left: 50%; transform: translate(-50%, -50%); font-size: 40px; font-weight: bold; color: #FFD700; text-shadow: 2px 2px 0 #000; z-index: 50; animation: popFade 1.5s forwards; white-space: nowrap; }
     @keyframes popFade { 0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; } 30% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; } 100% { transform: translate(-50%, -100%) scale(1.5); opacity: 0; } }
 
-    /* 🎨 [UI 대폭 개선] 패널 디자인 */
+    /* 팝업 UI */
     .overlay{ position:absolute; inset:0; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); display:flex; justify-content:center; align-items:center; z-index: 100; }
-    
-    .panel { 
-        background: white; 
-        padding: 30px 25px; /* 여백 증가 */
-        border-radius: 30px; 
-        box-shadow: 0 20px 60px rgba(0,0,0,0.4); 
-        text-align:center; 
-        width: 90%; 
-        max-width: 450px; /* 패널 폭 넓힘 */
-        max-height: 90vh; 
-        display: flex; flex-direction: column; 
-        overflow-y: auto; 
-        gap: 10px; /* 내부 요소 간격 추가 */
-    }
-    
+    .panel{ background: white; padding: 25px; border-radius: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); text-align:center; width: 90%; max-width: 400px; max-height: 90vh; display: flex; flex-direction: column; overflow-y: auto; }
     .hidden { display: none !important; }
 
     .chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 5px; justify-content: center; }
-    .chip { padding: 10px 15px; border: 2px solid #eee; border-radius: 20px; cursor: pointer; font-weight: bold; background: #fafafa; font-size: 14px; color: #aaa; filter: grayscale(1); } 
+    .chip { padding: 8px 12px; border: 2px solid #eee; border-radius: 15px; cursor: pointer; font-weight: bold; background: #fafafa; font-size: 13px; color: #aaa; filter: grayscale(1); } 
     .chip.owned { color: #333; filter: grayscale(0); border-color: #ddd; } 
     .chip.selected { border-color: #333; background: #333; color: white !important; filter: none; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
     .chip.bg-unlocked { border-color: #00b894; background: #f0fffa; color: #006266; filter: none; opacity: 1;}
     .chip.bg-unlocked.selected { background: #00b894; color: white; }
 
-    /* 버튼 스타일 개선 */
-    .btn-group { display: flex; gap: 12px; justify-content: center; margin-top: 10px; width: 100%; }
-    button { border: none; padding: 14px; border-radius: 15px; font-size: 16px; font-weight: 800; cursor: pointer; transition: transform 0.1s; }
+    .btn-group { display: flex; gap: 8px; justify-content: center; margin-top: 15px; width: 100%; }
+    button { border: none; padding: 12px; border-radius: 12px; font-size: 15px; font-weight: bold; cursor: pointer; transition: transform 0.1s; }
     button:active { transform: scale(0.95); }
     .btn-primary { background: #333; color: white; flex: 1; }
     .btn-shop { background: #FFD700; color: #333; flex: 1; border: 2px solid #e6c200; }
     .btn-secondary { background: #f0f0f0; color: #333; flex: 1; }
     .btn-rank { background: var(--accent); color: white; flex: 1; }
-    .btn-submit { background: var(--accent); color: white; flex: 0 0 70px; }
+    .btn-submit { background: var(--accent); color: white; flex: 0 0 60px; }
 
-    .support-group { margin-top: 15px; border-top: 2px dashed #eee; padding-top: 15px; display: flex; gap: 10px; }
-    .btn-support { font-size: 13px; padding: 12px; flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px; font-weight: bold; }
-    .btn-ctee { background: #fffbe6; color: #d48806; border: 2px solid #d48806; }
-    .btn-bmc { background: #FFDD00; color: #333; border: 2px solid #e6c700; }
+    .support-group { margin-top: 15px; border-top: 1px dashed #eee; padding-top: 15px; display: flex; gap: 8px; }
+    .btn-support { font-size: 12px; padding: 10px; flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px; }
+    .btn-ctee { background: #FFD700; color: #333; border: 1px solid #e6c200; }
+    .btn-bmc { background: #FFDD00; color: #333; border: 1px solid #e6c700; }
 
     .shop-area { text-align: center; margin-top: 10px; }
     .shop-box { width: 100px; height: 100px; margin: 0 auto; background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="80" x="10" font-size="80">🎁</text></svg>') no-repeat center; background-size: contain; cursor: pointer; }
@@ -134,21 +121,12 @@
     .gacha-msg { font-size: 16px; font-weight: bold; color: var(--accent); min-height: 24px; margin-bottom: 10px; }
 
     .sound-toggle { position: absolute; top: 10px; right: 10px; font-size: 24px; cursor: pointer; z-index: 30; background: rgba(255,255,255,0.7); border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; }
-    
-    /* 📋 [수정됨] 랭킹 리스트 높이 고정 (잘림 방지) */
-    .rank-list { 
-        margin-top: 10px; flex: 1; 
-        min-height: 250px; /* 최소 높이 확보 */
-        max-height: 400px; /* 너무 길어지면 스크롤 */
-        overflow-y: auto; text-align: left; 
-        font-size: 14px; background: #f9f9f9; 
-        border-radius: 15px; padding: 15px; 
-    }
-    .rank-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; }
-    .rank-form { display: flex; gap: 8px; margin-bottom: 5px; }
-    .rank-input { flex: 1; padding: 12px; border: 2px solid #ddd; border-radius: 12px; font-size: 15px; }
-    .fortune-area { margin-top: 15px; border-top: 2px dashed #eee; padding-top: 15px; text-align: center; }
-    .btn-fortune { background: linear-gradient(45deg, #ff9a9e, #fad0c4); color: white; width: 100%; border: none; font-size: 15px; padding: 12px; }
+    .rank-list { margin-top: 10px; flex: 1; min-height: 150px; overflow-y: auto; text-align: left; font-size: 13px; background: #f9f9f9; border-radius: 10px; padding: 10px; }
+    .rank-item { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #eee; }
+    .rank-form { display: flex; gap: 5px; margin-bottom: 5px; }
+    .rank-input { flex: 1; padding: 8px; border: 2px solid #ddd; border-radius: 10px; }
+    .fortune-area { margin-top: 10px; border-top: 1px dashed #ddd; padding-top: 10px; text-align: center; }
+    .btn-fortune { background: linear-gradient(45deg, #ff9a9e, #fad0c4); color: white; width: 100%; border: none; }
   </style>
 </head>
 <body class="bg-pink"> 
@@ -177,12 +155,14 @@
 
     <div class="overlay" id="startOverlay">
       <div class="panel">
-        <h1 style="margin: 10px 0;">🏃 게임 설정</h1>
-        <p style="margin: 0 0 15px 0;">보유 코인: 💰 <span id="startCoins">0</span></p>
+        <h1>게임 설정</h1>
+        <p>보유 코인: 💰 <span id="startCoins">0</span></p>
         <div class="options-group">
+          <span style="font-size:13px; font-weight:bold; color:#888;">캐릭터</span>
           <div class="chips" id="charOptions"></div>
         </div>
         <div class="options-group">
+          <span style="font-size:13px; font-weight:bold; color:#888;">배경 테마</span>
           <div class="chips" id="bgOptions">
             <div class="chip selected" onclick="selectBg('bg-pink', this)">🌸 분홍</div>
             <div class="chip" onclick="selectBg('bg-sky', this)">☁️ 하늘</div>
@@ -214,10 +194,10 @@
 
     <div class="overlay hidden" id="gameOverOverlay">
       <div class="panel">
-        <h2 style="font-size:45px; margin:0;">😵‍💫</h2>
-        <h1 style="margin: 5px 0;">게임 오버!</h1>
-        <p style="font-size:20px; font-weight:bold; margin: 10px 0; color:#333;">
-            점수: <span id="finalScore" style="color:var(--accent); font-size:24px;">0</span>
+        <h2 style="font-size:40px; margin:0;">😵‍💫</h2>
+        <h1>게임 오버!</h1>
+        <p style="font-size:18px; font-weight:bold; margin: 10px 0;">
+            점수: <span id="finalScore" style="color:var(--accent);">0</span>
         </p>
         
         <div class="fortune-area" id="fortuneContainer"></div>
@@ -227,7 +207,6 @@
           <button class="btn-secondary" onclick="backToSettings()">⚙️ 설정</button>
           <button class="btn-primary" onclick="restartGame()">🔄 재시작</button>
         </div>
-        
         <div class="btn-group">
             <button class="btn-secondary" onclick="shareScore()">🔗 공유</button>
             <button class="btn-rank" onclick="openRanking()">🏆 랭킹</button>
@@ -241,17 +220,13 @@
     </div>
 
     <div class="overlay hidden" id="rankingOverlay">
-        <div class="panel">
+        <div class="panel" style="height:85vh;">
             <h2>🏆 명예의 전당</h2>
             <div class="rank-form">
                 <input type="text" id="nicknameInput" class="rank-input" placeholder="닉네임 (최대 8자)" maxlength="8">
                 <button class="btn-submit" onclick="submitRank()">등록</button>
             </div>
-            <div id="rankList" class="rank-list">
-                <div style="text-align:center; padding:30px; color:#999;">
-                    데이터를 불러오는 중...<br>(잠시만 기다려주세요)
-                </div>
-            </div>
+            <div id="rankList" class="rank-list">로딩 중...</div>
             <div style="margin-top:10px; width:100%;">
                 <button class="btn-secondary" style="width:100%;" onclick="closeRanking()">↩️ 뒤로가기</button>
             </div>
@@ -437,10 +412,9 @@
 
   function checkHiddenUnlock() {
       if (best >= 1000 && !document.getElementById('bgSunset')) addBgOption('bg-sunset', '🔥 노을', 'bgSunset');
-      // 🔄 오로라/심해 이름표 교체
-      if (best >= 1500 && !document.getElementById('bgMidnight')) addBgOption('bg-aurora', '🌃 심해', 'bgMidnight'); 
+      if (best >= 1500 && !document.getElementById('bgMidnight')) addBgOption('bg-midnight', '🌃 심해', 'bgMidnight'); 
       if (best >= 2000 && !document.getElementById('bgSpace')) addBgOption('bg-space', '🚀 우주', 'bgSpace');
-      if (best >= 2500 && !document.getElementById('bgAurora')) addBgOption('bg-midnight', '🌈 오로라', 'bgAurora');
+      if (best >= 2500 && !document.getElementById('bgAurora')) addBgOption('bg-aurora', '🌈 오로라', 'bgAurora');
   }
 
   function addBgOption(cls, name, id) {
@@ -516,7 +490,6 @@
 
       playerY += velocityY; velocityY -= gravity;
       
-      // 🦶 착지 (Squash) 효과: 짧고 굵게
       if (playerY <= 0) { 
           if(velocityY < -5) { 
               player.classList.remove('landing'); 
@@ -625,7 +598,6 @@
       gameOverOverlay.classList.remove('hidden');
   }
 
-  // --- 랭킹 ---
   function openRanking() { gameOverOverlay.classList.add('hidden'); rankingOverlay.classList.remove('hidden'); loadRank(); }
   function closeRanking() { rankingOverlay.classList.add('hidden'); gameOverOverlay.classList.remove('hidden'); }
   
@@ -640,19 +612,15 @@
   }
 
   function loadRank() {
-      rankList.innerHTML = "<div style='text-align:center; padding:30px; color:#999;'>데이터를 불러오는 중...<br>(잠시만 기다려주세요)</div>";
+      rankList.innerHTML = "로딩 중...";
       fetch(SCRIPT_URL).then(res => res.json()).then(data => {
           let html = "";
-          if (data.length === 0) {
-              html = "<div style='text-align:center; padding:20px;'>아직 등록된 랭킹이 없습니다.</div>";
-          } else {
-              data.slice(0, 10).forEach((item, idx) => {
-                  let rankIcon = idx === 0 ? "🥇" : (idx === 1 ? "🥈" : (idx === 2 ? "🥉" : `${idx+1}위`));
-                  html += `<div class="rank-item"><span>${rankIcon} ${item.name}</span><span>${item.score}</span></div>`;
-              });
-          }
+          data.slice(0, 10).forEach((item, idx) => {
+              let rankIcon = idx === 0 ? "🥇" : (idx === 1 ? "🥈" : (idx === 2 ? "🥉" : `${idx+1}위`));
+              html += `<div class="rank-item"><span>${rankIcon} ${item.name}</span><span>${item.score}</span></div>`;
+          });
           rankList.innerHTML = html;
-      }).catch(() => rankList.innerHTML = "<div style='text-align:center; color:red; padding:20px;'>랭킹 로드 실패<br>(인터넷 연결 확인)</div>");
+      }).catch(() => rankList.innerHTML = "랭킹 로드 실패");
   }
 
   function shareScore() {
