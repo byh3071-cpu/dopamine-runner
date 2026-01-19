@@ -1,0 +1,874 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  
+  <title>Dopamine Runner: Gacha Shop 🎲</title>
+  
+  <style>
+    @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css");
+
+    :root{ --bg:#fde2ff; --panel: rgba(255,255,255,.95); --ink:#2a2a2a; --shadow: 0 4px 10px rgba(0,0,0,.1); --round: 20px; --ground-height: 40px; --accent: #6200ea; }
+    * { box-sizing: border-box; }
+    
+    body{ margin:0; height: 100dvh; display:flex; justify-content: center; align-items: center; background: var(--bg); font-family: "Pretendard", sans-serif; color:var(--ink); overflow:hidden; touch-action: none; user-select: none; -webkit-user-select: none; transition: background 2s ease; }
+
+    /* 배경 테마 */
+    body.sunset { background: linear-gradient(to bottom, #e66465, #9198e5) !important; color: white; }
+    body.night { background: linear-gradient(to bottom, #0f2027, #203a43, #2c5364) !important; color: white; }
+    body.midnight { background: linear-gradient(to bottom, #232526, #414345) !important; color: white; }
+    body.space { background: linear-gradient(to bottom, #2b1055, #7597de) !important; color: white; }
+    body.aurora { background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab) !important; background-size: 400% 400% !important; animation: gradientBG 10s ease infinite !important; color: white; }
+    body.fever-mode { background: linear-gradient(45deg, #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000) !important; background-size: 400%; animation: rainbowBg 0.5s linear infinite !important; color: white !important; }
+    @keyframes rainbowBg { 0% {background-position: 0%;} 100% {background-position: 400%;} }
+    @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
+    .app{ width: 100%; height: 100%; position:relative; display: flex; flex-direction: column; }
+    .top-container { position: relative; margin: 20px; z-index: 20; flex-shrink: 0; }
+    .topbar{ display:flex; justify-content:space-between; align-items:center; padding:15px 20px; background:var(--panel); border-radius:var(--round); box-shadow: var(--shadow); font-weight: bold; color: #2a2a2a !important; }
+    .score-box span{ background: white; padding: 5px 12px; border-radius: 15px; margin-left: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); color: #333; font-weight: 900; }
+    
+    /* 💰 코인 표시 UI */
+    .coin-display { position: absolute; top: -10px; right: 10px; background: #FFD700; color: #333; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.2); transform: translateY(-100%); z-index: 25; border: 2px solid #fff; }
+
+    .fever-bar-bg { width: 100%; height: 10px; background: rgba(0,0,0,0.2); border-radius: 10px; margin-top: 8px; overflow: hidden; border: 2px solid rgba(255,255,255,0.5); }
+    .fever-bar-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #fbc02d, #ffeb3b); transition: width 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 0 10px #ffeb3b; }
+    .fever-bar-fill.full { background: linear-gradient(90deg, #ff0000, #ffff00); animation: pulseBar 0.2s infinite; }
+    @keyframes pulseBar { 0%{opacity:1;} 50%{opacity:0.7;} 100%{opacity:1;} }
+
+    .stage{ position:relative; flex-grow: 1; width: 100%; border-radius: var(--round); box-shadow: var(--shadow); background: transparent; overflow:hidden; user-select:none; cursor: pointer; -webkit-tap-highlight-color: transparent; transform: translateZ(0); }
+    .stage.shake { animation: shakeAnim 0.5s cubic-bezier(.36,.07,.19,.97) both; }
+    .stage.smash-shake { animation: smashShake 0.2s cubic-bezier(.36,.07,.19,.97) both; }
+    @keyframes shakeAnim { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
+    @keyframes smashShake { 0% { transform: translate(0,0); } 25% { transform: translate(5px, 5px); } 50% { transform: translate(-5px, -5px); } 75% { transform: translate(5px, -5px); } 100% { transform: translate(0,0); } }
+
+    .ground{ position: absolute; bottom:0; width: 100%; height: var(--ground-height); background: rgba(255,255,255,0.6); border-top: 3px solid rgba(255,255,255,0.8); transition: background 1.5s; }
+    body.night .ground, body.space .ground, body.aurora .ground, body.midnight .ground, body.sunset .ground { background: rgba(255,255,255,0.15); border-top: 3px solid rgba(255,255,255,0.3); }
+
+    .player { position: absolute; left: 50px; bottom: var(--ground-height); width: 90px; height: 90px; z-index: 10; transform-origin: center; will-change: transform, bottom; background: transparent; transition: transform 0.3s; display:flex; align-items:center; justify-content:center; font-size: 60px; /* 이모지용 */ }
+    .player img { width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated; filter: drop-shadow(0 4px 2px rgba(0,0,0,0.2)); transition: transform 0.1s; }
+    .player.giant { transform: scale(1.5); filter: drop-shadow(0 0 15px gold); }
+    
+    @keyframes runWobble { 0% { transform: rotate(-3deg) translateY(0); } 25% { transform: rotate(0deg) translateY(-2px); } 50% { transform: rotate(3deg) translateY(0); } 75% { transform: rotate(0deg) translateY(-2px); } 100% { transform: rotate(-3deg) translateY(0); } }
+    .player.running img, .player.running.emoji-char { animation: runWobble 0.3s infinite linear; }
+    .spin img, .spin.emoji-char { animation: spinPlayer 0.5s ease-in-out; }
+    @keyframes spinPlayer { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    @keyframes knockback { 0% { transform: scale(1) rotate(0deg); opacity: 1; } 100% { transform: scale(0.8) rotate(720deg) translate(200px, -200px); opacity: 0; } }
+    .player.dead { animation: knockback 0.8s forwards ease-out; }
+
+    .trail { position: absolute; width: 90px; height: 90px; opacity: 0.6; pointer-events: none; z-index: 5; filter: grayscale(1) blur(1px); transition: opacity 0.3s, transform 0.3s; display:flex; align-items:center; justify-content:center; font-size: 60px;}
+    .trail img { width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated; }
+
+    .dust { position: absolute; width: 30px; height: 15px; background: rgba(255, 255, 255, 0.7); border-radius: 50%; z-index: 5; animation: dustAnim 0.4s forwards; }
+    @keyframes dustAnim { 0% { transform: scale(0.5); opacity: 0.8; } 100% { transform: scale(1.5) translateY(-10px); opacity: 0; } }
+    .float-text { position: absolute; font-weight: 900; color: #ffeb3b; font-size: 24px; z-index: 50; pointer-events: none; text-shadow: 2px 2px 0 #000; animation: floatUp 0.8s forwards; }
+    @keyframes floatUp { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-60px) scale(1.2); opacity: 0; } }
+
+    .obstacle{ position:absolute; width:50px; height:50px; font-size:40px; display:flex; align-items:center; justify-content:center; will-change: left; transition: filter 0.5s; }
+    .obstacle.bird { animation: fly 0.6s infinite alternate ease-in-out; font-size: 45px; }
+    @keyframes fly { from { transform: translateY(0); } to { transform: translateY(-10px); } }
+    .obstacle.high-danger { filter: hue-rotate(270deg); font-size: 50px; }
+    .obstacle.tall { font-size: 70px; height: 90px; align-items: flex-end; }
+    body.night .obstacle, body.space .obstacle, body.aurora .obstacle { filter: brightness(1.2); }
+    .obstacle.smashed { transition: none; animation: smashAnim 0.5s forwards ease-out; z-index: 20; }
+    @keyframes smashAnim { 0% { transform: scale(1); } 30% { transform: scale(1.3) rotate(45deg); filter: brightness(5); } 100% { transform: scale(0) rotate(180deg) translate(50px, -150px); opacity: 0; } }
+
+    .item-star { position: absolute; width: 40px; height: 40px; font-size: 35px; display: flex; align-items: center; justify-content: center; z-index: 9; animation: spinStar 2s infinite linear; will-change: left; }
+    @keyframes spinStar { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    .milestone-text { position: absolute; top: 30%; left: 50%; transform: translate(-50%, -50%); font-size: 50px; font-weight: bold; color: #FFD700; text-shadow: 2px 2px 0 #000; pointer-events: none; z-index: 50; animation: popFade 1.5s forwards; }
+    @keyframes popFade { 0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; } 30% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; } 100% { transform: translate(-50%, -100%) scale(1.5); opacity: 0; } }
+
+    .overlay{ position:absolute; inset:0; background: rgba(0,0,0,0.4); backdrop-filter: blur(5px); display:flex; justify-content:center; align-items:center; z-index: 100; transition: opacity 0.2s; }
+    .panel{ background: white; padding: 25px; border-radius: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); text-align:center; width: 90%; max-width: 450px; animation: popUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); max-height: 85vh; display: flex; flex-direction: column; }
+    @keyframes popUp { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+    .options-group { margin-bottom: 15px; text-align: left; }
+    .label { font-size: 13px; font-weight: bold; color: #888; margin-bottom: 8px; display: block; }
+    .chips { display: flex; gap: 8px; flex-wrap: wrap; }
+    .chip { padding: 10px 14px; border: 2px solid #eee; border-radius: 20px; cursor: pointer; font-weight: bold; background: #fafafa; transition: all 0.2s; display: flex; align-items: center; gap: 6px; font-size: 14px; color: #aaa; filter: grayscale(1); } /* 미보유 흐리게 */
+    .chip.owned { color: #333; filter: grayscale(0); border-color: #ddd; } /* 보유함 */
+    .chip:hover { transform: translateY(-2px); border-color: #ddd; }
+    .chip.selected { border-color: #333; background: #333; color: white !important; box-shadow: 0 5px 15px rgba(0,0,0,0.2); filter: none; }
+    
+    /* 칩 스타일 (잠김/해금) */
+    .chip.locked { opacity: 0.5; pointer-events: none; background: #eee; }
+    .chip.hidden-unlocked { border-color: gold; background: #fffbe6; color: #d48806; animation: glow 2s infinite; }
+    .chip.hidden-unlocked.selected { background: gold; color: white; border-color: orange; }
+    .chip.dragon-unlocked { border-color: #9775fa; background: #f3f0ff; color: #5f3dc4; animation: glowPurple 2s infinite; }
+    .chip.dragon-unlocked.selected { background: #7950f2; color: white; border-color: #5f3dc4; }
+    .chip.bg-unlocked { border-color: #00b894; background: #f0fffa; color: #006266; filter: none; opacity: 1;} /* 배경은 항상 활성 */
+    .chip.bg-unlocked.selected { background: #00b894; color: white; }
+    .chip.aurora-unlocked { background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab); background-size: 400% 400%; animation: gradientBG 5s ease infinite; color: white; border: none; font-weight: 900; text-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+    .chip.aurora-unlocked.selected { transform: scale(1.1); box-shadow: 0 0 15px rgba(0,0,0,0.3); border: 3px solid white; }
+    
+    @keyframes glow { 0%,100%{box-shadow: 0 0 5px gold;} 50%{box-shadow: 0 0 15px orange;} }
+    @keyframes glowPurple { 0%,100%{box-shadow: 0 0 5px #b197fc;} 50%{box-shadow: 0 0 15px #7950f2;} }
+
+    .btn-group { display: flex; gap: 10px; justify-content: center; margin-top: 15px; flex-wrap: wrap; }
+    button { border: none; padding: 12px 20px; border-radius: 12px; font-size: 15px; font-weight: bold; cursor: pointer; transition: transform 0.1s; }
+    button:active { transform: scale(0.95); }
+    .btn-primary { background: #333; color: white; flex: 1; min-width: 120px; }
+    .btn-secondary { background: #f0f0f0; color: #333; flex: 1; min-width: 100px; }
+    .btn-share { background: #4a90e2; color: white; flex: 1; min-width: 140px; }
+    .btn-rank { background: var(--accent); color: white; flex: 1; min-width: 100px; }
+    .btn-shop { background: #FFD700; color: #333; flex: 1; min-width: 120px; border: 2px solid #e6c200; }
+    
+    .support-group { margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+    .btn-support { font-size: 13px; padding: 10px 15px; flex: 1 1 auto; display: flex; align-items: center; justify-content: center; gap: 6px; transition: transform 0.1s; }
+    .btn-ctee { background: #FFD700; color: #333; border: 1px solid #e6c200; }
+    .btn-bmc { background: #FFDD00; color: #333; border: 1px solid #e6c700; }
+
+    .hidden { display: none !important; }
+    .result-box { background: #f9f9f9; border-radius: 15px; padding: 15px; margin: 10px 0; text-align: left; border: 2px solid #eee; overflow-y: auto; }
+    .result-rank { font-size: 16px; font-weight: bold; color: #333; margin-bottom: 8px; }
+    .fortune-area { margin-top: 10px; border-top: 1px dashed #ddd; padding-top: 10px; text-align: center; }
+    .locked-fortune { color: #999; font-size: 14px; font-style: italic; }
+    .btn-fortune { background: linear-gradient(45deg, #ff9a9e, #fad0c4); color: white; width: 100%; animation: pulse 1.5s infinite; border: none; }
+    .fortune-msg { font-size: 15px; color: #d48806; font-weight: bold; animation: popUp 0.5s; line-height: 1.4; word-break: keep-all;}
+    .sound-toggle { position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; z-index: 30; background: rgba(255,255,255,0.5); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; }
+
+    .rank-form { display: flex; gap: 5px; margin-top: 10px; flex-shrink: 0; }
+    .rank-input { flex: 1; padding: 10px; border: 2px solid #ddd; border-radius: 10px; font-weight: bold; }
+    .btn-submit { background: var(--accent); color: white; flex: 0 0 60px; }
+    .rank-list { margin-top: 10px; flex: 1; min-height: 0; overflow-y: auto; text-align: left; font-size: 13px; background: #fff; border: 1px solid #eee; padding: 5px; border-radius: 10px; }
+    .rank-item { display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid #f0f0f0; color: #333 !important; }
+    .rank-item:last-child { border-bottom: none; }
+    .rank-name { font-weight: bold; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-right: 10px; }
+    .rank-score { font-weight: bold; color: var(--accent); white-space: nowrap; }
+
+    /* 🎁 상점 UI */
+    .shop-area { text-align: center; margin-top: 10px; }
+    .shop-box { 
+        width: 120px; height: 120px; margin: 0 auto; 
+        background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="80" x="10" font-size="80">🎁</text></svg>') no-repeat center; 
+        background-size: contain; 
+        cursor: pointer; transition: transform 0.1s;
+    }
+    .shop-box:active { transform: scale(0.95); }
+    .shop-box.shaking { animation: boxShake 0.5s infinite; }
+    @keyframes boxShake { 0% { transform: rotate(0deg); } 25% { transform: rotate(10deg); } 50% { transform: rotate(-10deg); } 75% { transform: rotate(10deg); } 100% { transform: rotate(0deg); } }
+    .gacha-msg { font-size: 18px; font-weight: bold; color: var(--accent); min-height: 24px; margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+
+<div class="app">
+  <div class="top-container">
+    <div class="topbar">
+      <div>🏃 Dopamine Runner</div>
+      <div class="score-box">
+        최고 <span id="bestScore">0</span>
+        점수 <span id="currentScore">0</span>
+      </div>
+    </div>
+    <div class="coin-display">💰 <span id="userCoins">0</span></div>
+    <div class="fever-bar-bg">
+        <div id="feverBar" class="fever-bar-fill"></div>
+    </div>
+  </div>
+
+  <div class="stage" id="gameStage">
+    <div class="cloud-decor" style="position:absolute; top:20px; left:10%; font-size:30px; opacity:0.8; transition:opacity 1s;">☁️</div>
+    <div class="cloud-decor" style="position:absolute; top:50px; left:60%; font-size:40px; opacity:0.6; transition:opacity 1s;">☁️</div>
+    <div class="player" id="player"></div>
+    <div class="ground"></div>
+    <div class="sound-toggle" id="soundBtn" title="배경음악">🔊</div>
+
+    <div class="overlay" id="startOverlay">
+      <div class="panel">
+        <h1>게임 설정</h1>
+        <p>보유 코인: 💰 <span id="startCoins">0</span></p>
+        
+        <div class="options-group">
+          <span class="label">캐릭터 (기본 / 가챠 / 랭킹)</span>
+          <div class="chips" id="charOptions">
+            </div>
+        </div>
+        
+        <div class="options-group">
+          <span class="label">배경 테마 (점수별 해금)</span>
+          <div class="chips" id="bgOptions">
+            <div class="chip selected" onclick="selectBg('basic', '#fde2ff', this)">🌸 분홍</div>
+            <div class="chip" onclick="selectBg('basic', '#dff3ff', this)">☁️ 하늘</div>
+            <div class="chip" onclick="selectBg('basic', '#e6ffd9', this)">🌿 연두</div>
+          </div>
+        </div>
+        <div class="btn-group">
+            <button class="btn-shop" onclick="openShop()">🏪 상점</button>
+            <button class="btn-primary" onclick="startGame()">게임 시작 🎵</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="overlay hidden" id="shopOverlay">
+        <div class="panel">
+            <h2>🏪 스킨 상점</h2>
+            <p>코인으로 랜덤 스킨을 뽑아보세요!<br>(중복 시 300코인 환급)</p>
+            <div class="label">보유 코인: 💰 <span id="shopCoins">0</span></div>
+            
+            <div class="shop-area">
+                <div id="gachaBox" class="shop-box" onclick="drawGacha()"></div>
+                <div id="gachaResult" class="gacha-msg"></div>
+                <button class="btn-primary" onclick="drawGacha()">🎲 500코인 뽑기</button>
+            </div>
+
+            <div style="margin-top:15px;">
+                <button class="btn-secondary" onclick="closeShop()">↩️ 나가기</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="overlay hidden" id="gameOverOverlay">
+      <div class="panel">
+        <h2 style="font-size:40px; margin-bottom:5px;">😵‍💫</h2>
+        <h1>게임 오버!</h1>
+        <p style="font-size:16px; color:#333; font-weight:bold; margin-bottom:10px;">
+          최종 점수: <span id="finalScore">0</span>
+        </p>
+        <div class="result-box">
+            <div class="result-rank" id="rankText">🏆 등급: 신생아</div>
+            <div class="fortune-area" id="fortuneContainer"></div>
+        </div>
+        <div id="unlockMsg" class="hidden" style="color:#d48806; font-weight:bold; margin-bottom:15px; background:#fffbe6; padding:10px; border-radius:10px;"></div>
+        <div class="btn-group">
+          <button class="btn-secondary" onclick="backToSettings()">⚙️ 설정</button>
+          <button class="btn-primary" onclick="restartGame()">🔄 재시작</button>
+        </div>
+        <div class="btn-group">
+            <button class="btn-share" id="shareBtn" onclick="shareScore()">🔗 공유</button>
+            <button class="btn-rank" onclick="openRanking()">🏆 랭킹 보기</button>
+        </div>
+        <div class="support-group">
+          <button class="btn-support btn-ctee" onclick="window.open('https://ctee.kr/place/byh3071', '_blank')">☕ 국내 후원 (크티)</button>
+          <button class="btn-support btn-bmc" onclick="window.open('https://buymeacoffee.com/byh3071x?status=1', '_blank')">🌍 Global (BMC)</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="overlay hidden" id="rankingOverlay">
+        <div class="panel" style="display:flex; flex-direction:column; height:85vh;">
+            <h2 style="flex-shrink:0;">🏆 명예의 전당</h2>
+            <div class="label" style="text-align:left; margin-top:10px; flex-shrink:0;">내 기록 등록하기</div>
+            <div class="rank-form">
+                <input type="text" id="nicknameInput" class="rank-input" placeholder="닉네임 (미입력 시 익명)" maxlength="8">
+                <button class="btn-submit" onclick="submitRank()">등록</button>
+            </div>
+            <div id="rankList" class="rank-list">
+                <div style="text-align:center; color:#999; padding:20px;">로딩 중...</div>
+            </div>
+            <div style="margin-top:15px; flex-shrink:0;">
+                <button class="btn-primary" onclick="closeRanking()">↩️ 뒤로가기</button>
+            </div>
+        </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ⚠️ 구글 앱스 스크립트 URL 필수! (본인의 스크립트 주소로 확인해주세요)
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz4oxlHh4I9KvBj1rlgTdDCxFDrpwMugkfFzNZOMIG1ZzakJb93QD2KVdnmY2LuqOQZ3Q/exec"; 
+
+  const player = document.getElementById('player');
+  const stage = document.getElementById('gameStage');
+  const startOverlay = document.getElementById('startOverlay');
+  const gameOverOverlay = document.getElementById('gameOverOverlay');
+  const rankingOverlay = document.getElementById('rankingOverlay');
+  const shopOverlay = document.getElementById('shopOverlay');
+  
+  const scoreEl = document.getElementById('currentScore');
+  const finalScoreEl = document.getElementById('finalScore');
+  const bestScoreEl = document.getElementById('bestScore');
+  const charOptions = document.getElementById('charOptions');
+  const bgOptions = document.getElementById('bgOptions');
+  const unlockMsg = document.getElementById('unlockMsg');
+  const soundBtn = document.getElementById('soundBtn');
+  const shareBtn = document.getElementById('shareBtn');
+  const rankText = document.getElementById('rankText');
+  const fortuneContainer = document.getElementById('fortuneContainer');
+  const feverBar = document.getElementById('feverBar');
+  const rankList = document.getElementById('rankList');
+  const nicknameInput = document.getElementById('nicknameInput');
+  const userCoinsEl = document.getElementById('userCoins');
+  const startCoinsEl = document.getElementById('startCoins');
+  const shopCoinsEl = document.getElementById('shopCoins');
+  const gachaBox = document.getElementById('gachaBox');
+  const gachaResult = document.getElementById('gachaResult');
+
+  // --- 스킨 데이터 & 상태 관리 ---
+  let myChar = { type: 'image', val: 'dog.png' }; // 현재 선택된 캐릭터
+  let myBg = "#fde2ff";
+  let selectedBgType = 'basic'; 
+  let isSpecialTheme = false; 
+
+  // 저장된 데이터 불러오기
+  let best = Number(localStorage.getItem('runnerBest') || 0);
+  let totalCoins = Number(localStorage.getItem('runnerCoins') || 0);
+  // 소유 스킨 목록 (기본 dog는 포함)
+  let ownedSkins = JSON.parse(localStorage.getItem('runnerSkins') || '["dog.png"]');
+
+  // 전체 스킨 목록 정의
+  const SKIN_DB = [
+      { id: 'dog.png', name: '🐶 강아지', type: 'image', obtain: 'default' },
+      { id: 'cat.png', name: '🐱 고양이', type: 'image', obtain: 'gacha' },
+      { id: 'rabbit.png', name: '🐰 토끼', type: 'image', obtain: 'gacha' },
+      { id: '🐼', name: '🐼 판다', type: 'emoji', obtain: 'gacha' },
+      { id: '👽', name: '👽 외계인', type: 'emoji', obtain: 'gacha' },
+      { id: '🦄', name: '🦄 유니콘', type: 'emoji', obtain: 'gacha' },
+      { id: 'tiger.png', name: '🐯 호랑이', type: 'image', obtain: 'score', req: 1000 },
+      { id: 'dragon.png', name: '🐲 용', type: 'image', obtain: 'score', req: 2000 }
+  ];
+
+  let isRunning = false;
+  let score = 0;
+  let animationId;
+  let frameCount = 0;
+  let gameSpeed = 7.5; 
+  const maxSpeed = 25; 
+  const acceleration = 0.0015; 
+  
+  let feverGauge = 0;
+  let isFever = false;
+  let originalSpeed = 0;
+  let playerY = 0; 
+  let velocityY = 0;
+  const gravity = 0.8;
+  const jumpPower = 14;
+  let jumpCount = 0; 
+  const maxJumps = 2; 
+  const GROUND_HEIGHT = 40; 
+
+  let obstacles = [];
+  let items = []; 
+  let trails = []; 
+
+  // 해금 점수 상수 정의 (추가됨)
+  const UNLOCK_SCORE_TIGER = 1000;
+  const UNLOCK_SCORE_DRAGON = 2000;
+  
+  const BG_UNLOCK_SUNSET = 1000;
+  const BG_UNLOCK_MIDNIGHT = 1500;
+  const BG_UNLOCK_SPACE = 2000;
+  const BG_UNLOCK_AURORA = 2500;
+
+  let cooldownTimer = 0; 
+
+  // 초기화
+  bestScoreEl.innerText = best;
+  updateCoinUI();
+  renderCharOptions();
+  updatePlayerImage();
+  checkHiddenUnlock(); 
+
+  // --- 유틸리티 ---
+  function updateCoinUI() {
+      userCoinsEl.innerText = totalCoins;
+      startCoinsEl.innerText = totalCoins;
+      shopCoinsEl.innerText = totalCoins;
+      localStorage.setItem('runnerCoins', totalCoins);
+  }
+
+  function updatePlayerImage() { 
+      if (myChar.type === 'image') {
+          player.innerHTML = `<img src="${myChar.val}" alt="Char">`;
+          player.classList.remove('emoji-char');
+      } else {
+          player.innerHTML = myChar.val;
+          player.classList.add('emoji-char');
+      }
+  }
+
+  // --- 상점 & 가챠 시스템 ---
+  function openShop() {
+      startOverlay.classList.add('hidden');
+      shopOverlay.classList.remove('hidden');
+      gachaResult.innerText = "";
+      gachaBox.classList.remove('shaking');
+  }
+  function closeShop() {
+      shopOverlay.classList.add('hidden');
+      startOverlay.classList.remove('hidden');
+      renderCharOptions(); // 새로 얻은 스킨 반영
+  }
+  
+  function drawGacha() {
+      const COST = 500;
+      if (totalCoins < COST) {
+          alert("코인이 부족합니다! 열심히 달려서 모아오세요! 🏃‍♂️");
+          return;
+      }
+      
+      // 코인 차감
+      totalCoins -= COST;
+      updateCoinUI();
+      
+      // 애니메이션
+      gachaBox.classList.add('shaking');
+      gachaResult.innerText = "두근두근...";
+      playSound('milestone'); // 효과음 재활용
+
+      setTimeout(() => {
+          gachaBox.classList.remove('shaking');
+          // 가챠 로직: obtain이 'gacha'인 애들 중에서 랜덤
+          const gachaPool = SKIN_DB.filter(s => s.obtain === 'gacha');
+          const picked = gachaPool[Math.floor(Math.random() * gachaPool.length)];
+          
+          let msg = "";
+          if (ownedSkins.includes(picked.id)) {
+              // 중복 -> 환급
+              totalCoins += 300;
+              updateCoinUI();
+              msg = `💥 중복! [${picked.name}] (300코인 돌려받음)`;
+          } else {
+              // 당첨 -> 저장
+              ownedSkins.push(picked.id);
+              localStorage.setItem('runnerSkins', JSON.stringify(ownedSkins));
+              msg = `🎉 축하합니다! [${picked.name}] 획득!`;
+              playSound('coin');
+          }
+          gachaResult.innerText = msg;
+      }, 1000);
+  }
+
+  // --- 캐릭터 선택 UI 렌더링 ---
+  function renderCharOptions() {
+      charOptions.innerHTML = "";
+      SKIN_DB.forEach(skin => {
+          const isOwned = ownedSkins.includes(skin.id) || (skin.obtain === 'score' && best >= skin.req);
+          const isSelected = myChar.val === skin.id;
+          
+          const el = document.createElement('div');
+          el.className = `chip ${isOwned ? 'owned' : ''} ${isSelected ? 'selected' : ''}`;
+          
+          // 점수 해금형 처리
+          if (skin.obtain === 'score' && !isOwned) {
+              el.classList.add(skin.id.includes('dragon') ? 'dragon-unlocked' : 'hidden-unlocked');
+              el.classList.add('locked');
+              el.innerText = `🔒 ${skin.req}점`;
+          } else {
+              el.innerText = skin.name;
+              if (isOwned) {
+                  el.onclick = () => selectChar(skin.id, skin.type);
+              }
+          }
+          charOptions.appendChild(el);
+      });
+  }
+
+  function selectChar(id, type) {
+      myChar = { type: type, val: id };
+      renderCharOptions(); // 선택 상태 갱신
+      updatePlayerImage();
+  }
+
+  // ... (이하 오디오, 게임 로직은 기존과 동일하되 스코어 -> 코인 저장 로직 추가) ...
+
+  let audioCtx = null;
+  let isMuted = false;
+  function initAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === 'suspended') audioCtx.resume(); }
+  function playBGM() {
+    if (isMuted || !audioCtx) return; stopBGM(); 
+    const notes = [392, 392, 440, 392, 523, 493, 392, 392, 440, 392, 587, 523]; 
+    let time = audioCtx.currentTime;
+    notes.forEach((freq, index) => createOscillator(freq, time + index * 0.4, 0.2, 'square'));
+    window.bgmInterval = setInterval(() => {
+       if(!isRunning || isMuted) { clearInterval(window.bgmInterval); return; }
+       let t = audioCtx.currentTime;
+       notes.forEach((freq, index) => createOscillator(freq, t + index * 0.4, 0.2, 'square'));
+    }, notes.length * 400);
+  }
+  function createOscillator(freq, startTime, duration, type = 'square') {
+    const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+    osc.type = type; osc.frequency.value = freq;
+    const volume = type === 'sawtooth' ? 0.05 : 0.03; 
+    gain.gain.setValueAtTime(volume, startTime); gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+    osc.connect(gain); gain.connect(audioCtx.destination); osc.start(startTime); osc.stop(startTime + duration);
+  }
+  function playSound(type) {
+      if(!audioCtx || isMuted) return;
+      if(type === 'coin') { createOscillator(880, audioCtx.currentTime, 0.1, 'sine'); createOscillator(1760, audioCtx.currentTime + 0.1, 0.2, 'sine'); }
+      else if(type === 'milestone') { createOscillator(523, audioCtx.currentTime, 0.2, 'triangle'); createOscillator(659, audioCtx.currentTime + 0.1, 0.2, 'triangle'); createOscillator(784, audioCtx.currentTime + 0.2, 0.4, 'triangle'); }
+      else if(type === 'smash') { createOscillator(150, audioCtx.currentTime, 0.1, 'sawtooth'); createOscillator(100, audioCtx.currentTime + 0.05, 0.2, 'square'); }
+  }
+  function playCrunch() {
+    if (!audioCtx || isMuted) return;
+    const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+    osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(10, audioCtx.currentTime + 0.1); 
+    gain.gain.setValueAtTime(0.1, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.15); 
+    osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.15);
+  }
+  function stopBGM() { if (window.bgmInterval) clearInterval(window.bgmInterval); }
+  soundBtn.addEventListener('click', (e) => { e.stopPropagation(); isMuted = !isMuted; soundBtn.innerText = isMuted ? "🔇" : "🔊"; if(isMuted) stopBGM(); else if(isRunning) playBGM(); });
+
+  function selectBg(type, color, element) {
+    myBg = color; selectedBgType = type;
+    if (type !== 'basic') isSpecialTheme = true; else isSpecialTheme = false;
+    document.querySelectorAll('#bgOptions .chip').forEach(opt => opt.classList.remove('selected'));
+    element.classList.add('selected');
+    document.body.className = ''; 
+    if(type !== 'basic') document.body.classList.add(type);
+    else document.documentElement.style.setProperty('--bg', myBg);
+  }
+  function checkHiddenUnlock() {
+    if (best >= BG_UNLOCK_SUNSET && !document.getElementById('bgSunset')) {
+        const chip = document.createElement('div'); chip.id = 'bgSunset'; chip.className = 'chip bg-unlocked';
+        chip.innerHTML = '🔥 노을'; chip.onclick = function() { selectBg('sunset', '#9198e5', this); };
+        bgOptions.appendChild(chip);
+    }
+    if (best >= BG_UNLOCK_MIDNIGHT && !document.getElementById('bgMidnight')) {
+        const chip = document.createElement('div'); chip.id = 'bgMidnight'; chip.className = 'chip bg-unlocked';
+        chip.innerHTML = '🌃 심해'; chip.onclick = function() { selectBg('midnight', '#232526', this); };
+        bgOptions.appendChild(chip);
+    }
+    if (best >= BG_UNLOCK_SPACE && !document.getElementById('bgSpace')) {
+        const chip = document.createElement('div'); chip.id = 'bgSpace'; chip.className = 'chip bg-unlocked';
+        chip.innerHTML = '🚀 우주'; chip.onclick = function() { selectBg('space', '#2b1055', this); };
+        bgOptions.appendChild(chip);
+    }
+    if (best >= BG_UNLOCK_AURORA && !document.getElementById('bgAurora')) {
+        const chip = document.createElement('div'); chip.id = 'bgAurora'; chip.className = 'chip aurora-unlocked';
+        chip.innerHTML = '🌈 오로라'; chip.onclick = function() { selectBg('aurora', '#000000', this); };
+        bgOptions.appendChild(chip);
+    }
+    renderCharOptions(); // 갱신
+  }
+  function getRank(s) {
+    if(s < 100) return "🥚 걷기도 힘든 신생아";
+    if(s < 500) return "🐢 동네 마실 나온 거북이";
+    if(s < 1000) return "🐕 산책 나온 강아지";
+    if(s < 2000) return "🏅 국가대표급 피지컬";
+    if(s < 3000) return "🔥 중력을 거스르는 자";
+    if(s < 4000) return "🚀 대기권 돌파! 우주인";
+    if(s < 5000) return "👽 지구 정복하러 온 외계인";
+    return "👑 살아있는 전설 (GOD)";
+  }
+  window.openFortune = function() {
+    initAudio(); playCrunch();
+    const fortunes = {
+        bad: ["⛈️ [흉] 새똥 맞을 확률 99%...", "⛈️ [흉] 지갑 두고 나올 수 있음.", "⛈️ [흉] 이어폰 한쪽 고장남.", "⛈️ [흉] 발목 조심하세요."],
+        normal: ["☁️ [보통] 그냥 그런 하루.", "☁️ [보통] 점심 메뉴 고민하다 시간 다 감.", "☁️ [보통] 졸린 하루.", "☁️ [보통] 무소식이 희소식."],
+        small: ["🍀 [소길] 버스 바로 옴!", "🍀 [소길] 주머니에서 천원 발견.", "🍀 [소길] 신호등 파란불!", "🍀 [소길] 편의점 1+1 행사."],
+        great: ["🌞 [대길] 숨만 쉬어도 잘 풀림!", "🌞 [대길] 로또 5천원 당첨?", "🌞 [대길] 오늘 주인공은 당신!", "🌞 [대길] 귀인을 만날 운세."],
+        love: ["💘 [연애] 썸남/녀 연락 옴.", "💘 [연애] 이상형과 눈 마주침.", "💘 [연애] 매력 폭발.", "💔 [연애/흉] 전 애인 소식 무시하세요."],
+        money: ["💰 [금전/대박] 꽁돈 생길 운세!", "💰 [금전/주의] 충동구매 조심.", "💰 [금전] 빌려준 돈 받음.", "💸 [금전/흉] 택시비 아끼세요."]
+    };
+    const rand = Math.random();
+    let msgList = [];
+    if (rand < 0.05) msgList = fortunes.bad; else if (rand < 0.25) msgList = fortunes.normal; else if (rand < 0.50) msgList = fortunes.small; else if (rand < 0.80) msgList = fortunes.great; else if (rand < 0.90) msgList = fortunes.love; else msgList = fortunes.money;
+    const msg = msgList[Math.floor(Math.random() * msgList.length)];
+    fortuneContainer.innerHTML = `<div class="fortune-msg">${msg}</div>`;
+  };
+  function shareScore() {
+    const rank = getRank(score);
+    const text = `🏃 Dopamine Runner\n[기록] ${Math.floor(score)}점\n[등급] ${rank}\n\n도전해보세요! 👇\n🔗 ${window.location.href}`;
+    if (navigator.share) { navigator.share({ title: 'Dopamine Runner', text: text, url: window.location.href }).catch(console.error); }
+    else { navigator.clipboard.writeText(text).then(() => { const t = shareBtn.innerText; shareBtn.innerText = "✅ 복사 완료!"; setTimeout(() => { shareBtn.innerText = t; }, 2000); }).catch(err => alert("복사 실패 ㅠㅠ")); }
+  }
+
+  function openRanking() {
+      gameOverOverlay.classList.add('hidden');
+      rankingOverlay.classList.remove('hidden');
+      loadRank(); 
+  }
+  function closeRanking() {
+      rankingOverlay.classList.add('hidden');
+      gameOverOverlay.classList.remove('hidden');
+  }
+  function submitRank() {
+      let name = nicknameInput.value.trim();
+      if (!name) name = "익명"; 
+      const final = Math.floor(score);
+      if (SCRIPT_URL.includes("붙여넣으세요")) return alert("랭킹 서버가 연결되지 않았습니다.");
+      const btn = document.querySelector('.btn-submit');
+      btn.disabled = true; btn.innerText = "...";
+      fetch(SCRIPT_URL, {
+          method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: name, score: final })
+      }).then(() => {
+          alert("랭킹 등록 완료!"); nicknameInput.value = ""; btn.disabled = false; btn.innerText = "등록"; loadRank();
+      }).catch(err => { alert("전송 실패: " + err); btn.disabled = false; btn.innerText = "등록"; });
+  }
+  function loadRank() {
+      rankList.innerHTML = '<div style="text-align:center; color:#999; padding:20px;">로딩 중...</div>';
+      if (SCRIPT_URL.includes("붙여넣으세요")) return rankList.innerHTML = "<div>랭킹 서버 미연결</div>";
+      fetch(SCRIPT_URL).then(res => res.json()).then(data => {
+          let html = "";
+          data.forEach(item => {
+              let medal = "";
+              if(item.rank === 1) medal = "🥇"; else if(item.rank === 2) medal = "🥈"; else if(item.rank === 3) medal = "🥉";
+              else medal = `<span style="display:inline-block;width:15px;text-align:center;">${item.rank}</span>`;
+              const displayName = (item.name && item.name.trim() !== "") ? item.name : "익명";
+              html += `<div class="rank-item"><div style="display:flex;align-items:center;width:70%;">${medal} <span class="rank-name" style="margin-left:5px;">${displayName}</span></div><span class="rank-score">${item.score}점</span></div>`;
+          });
+          if(data.length === 0) html = "<div style='text-align:center;padding:10px;'>아직 등록된 랭킹이 없습니다.</div>";
+          rankList.innerHTML = html;
+      }).catch(err => { rankList.innerHTML = "<div style='text-align:center; color:red;'>로드 실패</div>"; });
+  }
+
+  function startGame() {
+    initAudio(); playBGM();    
+    startOverlay.classList.add('hidden'); gameOverOverlay.classList.add('hidden');
+    rankingOverlay.classList.add('hidden'); shopOverlay.classList.add('hidden');
+    if(!isSpecialTheme) { document.body.className = ""; document.body.style.background = "var(--bg)"; stage.classList.remove('night', 'space'); }
+    isRunning = true; score = 0; gameSpeed = 7.5; frameCount = 0; 
+    obstacles = []; items = []; trails = [];
+    playerY = 0; velocityY = 0; jumpCount = 0;
+    feverGauge = 0; isFever = false;
+    updateFeverUI();
+    player.classList.remove('giant'); document.body.classList.remove('fever-mode');
+    updatePlayerImage(); player.className = 'player running'; 
+    if(myChar.type !== 'image') player.classList.add('emoji-char');
+    player.style.bottom = GROUND_HEIGHT + "px"; 
+    cooldownTimer = 0;
+    document.querySelectorAll('.obstacle').forEach(e => e.remove());
+    document.querySelectorAll('.item-star').forEach(e => e.remove());
+    document.querySelectorAll('.milestone-text').forEach(e => e.remove());
+    document.querySelectorAll('.dust').forEach(e => e.remove());
+    document.querySelectorAll('.float-text').forEach(e => e.remove());
+    document.querySelectorAll('.trail').forEach(e => e.remove());
+    animationId = requestAnimationFrame(gameLoop);
+  }
+  function restartGame() { startGame(); }
+  function backToSettings() {
+    stopBGM(); gameOverOverlay.classList.add('hidden'); startOverlay.classList.remove('hidden');
+    if(selectedBgType === 'basic') { document.body.className = ""; document.body.style.background = myBg; }
+    stage.classList.remove('night', 'space', 'shake');
+    document.body.classList.remove('fever-mode'); 
+    isRunning = false; cancelAnimationFrame(animationId); checkHiddenUnlock();
+  }
+
+  function jump() {
+    if (!isRunning) return;
+    if (jumpCount < maxJumps) {
+      velocityY = jumpPower; jumpCount++;
+      if (audioCtx && !isMuted) createOscillator(600 + (jumpCount*200), audioCtx.currentTime, 0.1);
+      player.classList.remove('running');
+      if(jumpCount === 2) { player.classList.add('spin'); setTimeout(() => player.classList.remove('spin'), 500); }
+    }
+  }
+
+  function showMilestone(text) {
+      playSound('milestone'); const el = document.createElement('div'); el.className = 'milestone-text'; el.innerText = text; stage.appendChild(el); setTimeout(() => el.remove(), 1500);
+  }
+  
+  function createDust() {
+    const dust = document.createElement('div'); dust.className = 'dust';
+    dust.style.left = '60px'; dust.style.bottom = (GROUND_HEIGHT - 5) + 'px';
+    stage.appendChild(dust); setTimeout(() => dust.remove(), 400);
+  }
+  
+  function createFloatText(x, y, text) {
+    const el = document.createElement('div'); el.className = 'float-text'; el.innerText = text;
+    el.style.left = x + 'px'; el.style.bottom = y + 'px';
+    stage.appendChild(el); setTimeout(() => el.remove(), 800);
+  }
+  function createTrail() {
+      const trail = document.createElement('div'); trail.className = 'trail';
+      trail.style.bottom = player.style.bottom; trail.style.left = player.style.left;
+      trail.style.transform = player.style.transform;
+      trail.innerHTML = player.innerHTML; 
+      stage.appendChild(trail);
+      setTimeout(() => { trail.style.opacity = 0; setTimeout(() => trail.remove(), 300); }, 50);
+  }
+
+  function updateFeverUI() {
+      feverBar.style.width = feverGauge + '%';
+      if(feverGauge >= 100) feverBar.classList.add('full'); else feverBar.classList.remove('full');
+  }
+  function startFever() {
+      if(isFever) return;
+      isFever = true; originalSpeed = gameSpeed; gameSpeed += 5; 
+      player.classList.add('giant'); document.body.classList.add('fever-mode'); showMilestone("FEVER TIME!! 🔥");
+      setTimeout(endFever, 5000);
+  }
+  function endFever() {
+      if(!isRunning) return;
+      isFever = false; gameSpeed = originalSpeed + 0.5; feverGauge = 0; updateFeverUI();
+      player.classList.remove('giant'); document.body.classList.remove('fever-mode');
+      if(!isSpecialTheme) { if (score >= 2000) { document.body.classList.add('space'); } else if (score >= 600) { document.body.classList.add('night'); } }
+  }
+
+  function gameLoop() {
+    if (!isRunning) return;
+    frameCount++;
+    if (!isFever && gameSpeed < maxSpeed) gameSpeed += acceleration;
+    
+    if (isFever && frameCount % 4 === 0) { createTrail(); }
+
+    if (frameCount % 6 === 0) {
+      score += (isFever ? 3 : 1); scoreEl.innerText = score;
+      if(score === 1000) { showMilestone("HELL MODE 🔥"); } 
+      else if (score % 500 === 0) { if (score !== 2000 || isSpecialTheme) { showMilestone(score + "!!"); } }
+      if (!isSpecialTheme && !isFever) {
+          if (score === 600) { document.body.classList.add('night'); stage.classList.add('night'); }
+          if (score === 2000) { document.body.classList.remove('night'); document.body.classList.add('space'); showMilestone("SPACE! 🚀"); }
+      }
+    }
+
+    playerY += velocityY; velocityY -= gravity;
+    if (playerY <= 0) { 
+      if (jumpCount > 0) { createDust(); player.classList.add('running'); }
+      playerY = 0; jumpCount = 0; 
+    }
+    player.style.bottom = (GROUND_HEIGHT + playerY) + "px";
+
+    if (cooldownTimer > 0) cooldownTimer--;
+    let difficultyFactor = 150; 
+    if (score > 500) difficultyFactor = 120;
+    if (score > 1000) difficultyFactor = 90; 
+    if (score > 2000) difficultyFactor = 70; 
+    if (isFever) difficultyFactor = 60;
+
+    let currentSpawnRate = Math.floor(difficultyFactor - (gameSpeed * 2));
+    if (currentSpawnRate < 20) currentSpawnRate = 20; 
+
+    if (cooldownTimer <= 0) { if (frameCount % currentSpawnRate === 0 || Math.random() < 0.05) createObstacle(); }
+    if (frameCount % 200 === 0 && Math.random() < 0.5) createItem();
+    
+    moveObstacles(); moveItems();
+    animationId = requestAnimationFrame(gameLoop);
+  }
+
+  function createItem() {
+      const item = document.createElement('div'); item.className = 'item-star'; item.innerText = '⭐';
+      const startX = stage.clientWidth + 50; item.xPos = startX; item.style.left = startX + 'px';
+      const itemH = GROUND_HEIGHT + 50 + Math.random() * 50; item.style.bottom = itemH + 'px';
+      stage.appendChild(item); items.push(item);
+  }
+
+  function moveItems() {
+      for (let i = items.length - 1; i >= 0; i--) {
+          let item = items[i]; item.xPos -= gameSpeed; item.style.left = item.xPos + "px";
+          if (item.xPos > 50 && item.xPos < 90) {
+              const itemBot = parseInt(item.style.bottom);
+              if (playerY + GROUND_HEIGHT + 60 > itemBot && playerY + GROUND_HEIGHT < itemBot + 40) {
+                  score += 50; scoreEl.innerText = score; playSound('coin'); 
+                  createFloatText(70, parseInt(item.style.bottom)+20, "+50");
+                  if (!isFever) { feverGauge = Math.min(feverGauge + 20, 100); updateFeverUI(); if (feverGauge >= 100) startFever(); }
+                  item.remove(); items.splice(i, 1); continue;
+              }
+          }
+          if (item.xPos < -50) { item.remove(); items.splice(i, 1); }
+      }
+  }
+
+  function createObstacle() {
+    const obs = document.createElement('div'); obs.classList.add('obstacle');
+    const rand = Math.random(); const startX = stage.clientWidth + 50; obs.xPos = startX; obs.style.left = startX + "px"; 
+    let isTutorial = score < 500; let isFairZone = (score >= 1000 && score < 2000); let highBirdChance = 0; if (score > 2000) highBirdChance = 0.5; 
+
+    if (rand < 0.3) { 
+      if (isTutorial) {
+          obs.innerText = "🌵"; obs.classList.add('ground'); obs.style.bottom = GROUND_HEIGHT + "px"; obs.type = 'ground'; cooldownTimer = 50; 
+      } else {
+          obs.innerText = "🦅"; obs.classList.add('bird');
+          if (isFairZone) {
+             obs.style.bottom = (GROUND_HEIGHT + 15) + "px"; obs.type = 'air_low'; cooldownTimer = 60; 
+          } else {
+             if (Math.random() < highBirdChance) {
+                obs.style.bottom = (GROUND_HEIGHT + 75) + "px"; obs.type = 'air_high'; obs.classList.add('high-danger'); cooldownTimer = 30; 
+             } else {
+                obs.style.bottom = (GROUND_HEIGHT + 15) + "px"; obs.type = 'air_low'; cooldownTimer = 25; 
+             }
+          }
+      }
+    } else if (rand < 0.5) {
+      if (isFairZone) {
+          obs.innerText = "🌵"; obs.classList.add('ground'); obs.style.bottom = GROUND_HEIGHT + "px"; obs.type = 'ground'; cooldownTimer = 60;
+      } else {
+          obs.innerText = "🌲"; obs.classList.add('tall'); obs.style.bottom = GROUND_HEIGHT + "px"; obs.type = 'tall'; cooldownTimer = 40; 
+      }
+    } else {
+      obs.innerText = Math.random() < 0.5 ? "🌵" : "🪨"; obs.style.bottom = GROUND_HEIGHT + "px"; obs.type = 'ground';
+      if (isFairZone) cooldownTimer = 55; else cooldownTimer = (score < 1000) ? 50 : 25;
+    }
+    stage.appendChild(obs); obstacles.push(obs);
+  }
+
+  function moveObstacles() {
+    for (let i = obstacles.length - 1; i >= 0; i--) {
+      let obs = obstacles[i]; 
+      
+      if (obs.isSmashed) {
+      } else {
+          obs.xPos -= gameSpeed; 
+          obs.style.left = obs.xPos + "px";
+      }
+
+      // 🎯 히트박스 정교화
+      const pLeft = 50 + 25;
+      const pRight = 50 + 90 - 25;
+      const pBottom = playerY + 20; 
+      const pTop = playerY + 90 - 20;
+
+      const oLeft = obs.xPos + 10;
+      const oRight = obs.xPos + 50 - 10;
+      const oBottom = parseInt(obs.style.bottom) - GROUND_HEIGHT; 
+      const oTop = oBottom + 50; 
+
+      // 충돌 체크
+      if (!obs.isSmashed && pRight > oLeft && pLeft < oRight && pTop > oBottom && pBottom < oTop) {
+          if (isFever) {
+              obs.isSmashed = true; obs.classList.add('smashed'); 
+              stage.classList.add('smash-shake'); setTimeout(() => stage.classList.remove('smash-shake'), 200);
+              playSound('smash');
+              createFloatText(obs.xPos, parseInt(obs.style.bottom)+50, "💥");
+              score += 10; continue; 
+          } else {
+              gameOver(); return; 
+          }
+      }
+      
+      if (obs.xPos < -60) { obs.remove(); obstacles.splice(i, 1); }
+    }
+  }
+
+  function gameOver() {
+    stopBGM(); if (audioCtx && !isMuted) createOscillator(150, audioCtx.currentTime, 0.5, 'sawtooth');
+    
+    player.classList.remove('running');
+    player.classList.add('dead');
+    
+    stage.classList.add('shake');
+    if (navigator.vibrate) navigator.vibrate(200);
+    setTimeout(() => { stage.classList.remove('shake'); }, 500);
+    isRunning = false; cancelAnimationFrame(animationId);
+    
+    const final = Math.floor(score); finalScoreEl.innerText = final; rankText.innerText = `🏆 등급: ${getRank(final)}`;
+    
+    // 점수 정산 및 코인 저장
+    totalCoins += final; 
+    localStorage.setItem('runnerCoins', totalCoins);
+    updateCoinUI();
+
+    if (final >= 1000) fortuneContainer.innerHTML = '<button class="btn-fortune" onclick="openFortune()">🥠 오늘의 운세 열기 (Click!)</button>';
+    else fortuneContainer.innerHTML = '<div class="locked-fortune">🔒 1,000점 달성 시 오늘의 운세가 열립니다!</div>';
+
+    unlockMsg.classList.add('hidden');
+    if (score > best) { best = score; localStorage.setItem('runnerBest', best); bestScoreEl.innerText = best; }
+    
+    let newUnlocks = [];
+    if (best >= UNLOCK_SCORE_DRAGON && !document.getElementById('hiddenDragon')) newUnlocks.push("용(🐲)");
+    if (best >= UNLOCK_SCORE_TIGER && !document.getElementById('hiddenTiger')) newUnlocks.push("호랑이(🐯)");
+    if (best >= BG_UNLOCK_AURORA && !document.getElementById('bgAurora')) newUnlocks.push("오로라 배경(🌈)");
+    if (best >= BG_UNLOCK_SPACE && !document.getElementById('bgSpace')) newUnlocks.push("우주 배경(🚀)");
+    
+    if (newUnlocks.length > 0) {
+        unlockMsg.innerHTML = `🎉 축하합니다! <b>${newUnlocks.join(", ")}</b> 해금 완료!`;
+        unlockMsg.classList.remove('hidden');
+        checkHiddenUnlock();
+    }
+    
+    setTimeout(() => {
+        gameOverOverlay.classList.remove('hidden');
+        player.classList.remove('dead');
+    }, 800);
+  }
+
+  window.addEventListener('keydown', (e) => { if (e.code === 'Space') { if (!isRunning) { if (!startOverlay.classList.contains('hidden')) startGame(); else if (!gameOverOverlay.classList.contains('hidden')) restartGame(); return; } jump(); } });
+  stage.addEventListener('touchstart', (e) => { if (e.target.closest('button') || e.target.closest('.chip') || e.target.closest('.sound-toggle') || e.target.closest('.rank-input') || e.target.closest('.shop-box')) return; e.preventDefault(); if (isRunning) jump(); else if (!startOverlay.classList.contains('hidden')) startGame(); else if (!gameOverOverlay.classList.contains('hidden')) restartGame(); }, { passive: false });
+  stage.addEventListener('mousedown', (e) => { if (e.target.closest('button') || e.target.closest('.chip') || e.target.closest('.sound-toggle') || e.target.closest('.rank-input') || e.target.closest('.shop-box')) return; if (isRunning) jump(); });
+</script>
+</body>
+</html>
