@@ -11,7 +11,7 @@
   <link rel="manifest" href="site.webmanifest" />
   <meta name="apple-mobile-web-app-title" content="Dopamine Runner" />
 
-  <title>Dopamine Runner: Background Image Ver.</title>
+  <title>Dopamine Runner: Clean UI</title>
   
   <style>
     @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css");
@@ -26,30 +26,25 @@
       color:var(--ink); overflow:hidden; touch-action: none; 
       user-select: none; -webkit-user-select: none;
       
-      /* 기본 배경 (이미지 로딩 전) */
       background-color: var(--bg);
       background-position: center;
       background-size: cover;
       background-repeat: no-repeat;
-      transition: background-image 0.5s ease-in-out; /* 이미지 전환 부드럽게 */
+      transition: background-image 0.5s ease-in-out; 
     }
 
-    /* 🔥 [배경 이미지 적용 스타일] */
+    /* 🔥 배경 이미지 매핑 (제공해주신 파일명 기준 1:1 매칭) */
     body.bg-pink { background-image: url('bg_pink.png') !important; color: #333; }
     body.bg-sky { background-image: url('bg_sky.png') !important; color: #333; }
     body.bg-green { background-image: url('bg_green.png') !important; color: #333; }
-    
-    /* 어두운 배경들은 글씨를 흰색으로 */
     body.sunset { background-image: url('bg_sunset.png') !important; color: white !important; }
     body.night { background-image: url('bg_midnight.png') !important; color: white !important; } /* 심해 */
     body.space { background-image: url('bg_space.png') !important; color: white !important; }
     body.aurora { 
         background-image: url('bg_aurora.png') !important; 
         color: white !important; 
-        /* 오로라는 움직이는 효과 유지하고 싶으면 아래 animation 추가 가능, 이미지만 쓸거면 삭제 */
     }
     
-    /* 피버 모드 (배경 이미지 위에 무지개 오버레이) */
     body.fever-mode { 
         position: relative;
         color: white !important;
@@ -64,41 +59,56 @@
 
     .app{ width: 100%; height: 100%; position:relative; display: flex; flex-direction: column; }
     
-    .top-container { position: relative; margin: 15px; z-index: 20; flex-shrink: 0; }
-    
-    .topbar {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 10px 15px; background: var(--panel); border-radius: var(--round);
-      box-shadow: var(--shadow); font-weight: bold; color: #2a2a2a !important;
-      min-height: 60px;
+    /* 📱 [수정됨] 상단 UI 컨테이너: 흰색 바 제거 및 양쪽 끝 정렬 */
+    .top-container { 
+        position: absolute; /* 화면 위에 둥둥 뜨게 */
+        top: 0; left: 0; right: 0;
+        padding: 15px; 
+        z-index: 20; 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: flex-start;
+        pointer-events: none; /* UI 빈 공간 터치 시 게임 조작 가능하도록 */
     }
-
-    .app-title { font-size: 16px; white-space: nowrap; margin-right: 10px; }
-    @media (max-width: 360px) { .app-title { display: none; } }
-
-    .info-group { display: flex; gap: 8px; align-items: center; }
-
+    
+    /* 코인 배지 (왼쪽) */
     .coin-badge { 
         background: #FFD700; color: #333; 
-        padding: 6px 10px; border-radius: 12px; 
-        font-size: 13px; font-weight: 800; 
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
-        display: flex; align-items: center; gap: 4px;
+        padding: 8px 12px; border-radius: 20px; 
+        font-size: 14px; font-weight: 800; 
+        box-shadow: 0 4px 6px rgba(0,0,0,0.2); 
+        display: flex; align-items: center; gap: 5px;
         white-space: nowrap;
+        border: 2px solid white;
+        pointer-events: auto;
     }
 
+    /* 점수판 (오른쪽) */
     .score-board {
-        background: white; padding: 5px 10px; border-radius: 12px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        background: rgba(255, 255, 255, 0.9); /* 반투명 흰색 */
+        backdrop-filter: blur(4px);
+        padding: 8px 12px; border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         display: flex; flex-direction: column;
         justify-content: center;
-        min-width: 80px;
+        min-width: 90px;
+        border: 2px solid rgba(255,255,255,0.5);
+        pointer-events: auto;
     }
-    .score-row { font-size: 12px; display: flex; justify-content: space-between; align-items: center; gap: 8px; line-height: 1.2; }
-    .score-row span:first-child { opacity: 0.6; font-size: 10px; }
-    .score-val { font-weight: 900; color: #333; }
+    .score-row { font-size: 12px; display: flex; justify-content: space-between; align-items: center; gap: 8px; line-height: 1.3; }
+    .score-row span:first-child { opacity: 0.7; font-size: 11px; font-weight: bold; }
+    .score-val { font-weight: 900; color: #333; font-size: 15px; }
 
-    .fever-bar-bg { width: 100%; height: 8px; background: rgba(0,0,0,0.2); border-radius: 10px; margin-top: 8px; overflow: hidden; border: 2px solid rgba(255,255,255,0.5); }
+    /* 피버바 (점수판 아래가 아닌 상단 중앙 쯤 배치하거나, 원래 위치 유지하되 absolute로) */
+    .fever-bar-bg { 
+        position: absolute; 
+        top: 70px; left: 20px; right: 20px; 
+        height: 8px; background: rgba(0,0,0,0.2); 
+        border-radius: 10px; overflow: hidden; 
+        border: 2px solid rgba(255,255,255,0.5); 
+        z-index: 15;
+        pointer-events: none;
+    }
     .fever-bar-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #fbc02d, #ffeb3b); transition: width 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 0 10px #ffeb3b; }
     .fever-bar-fill.full { background: linear-gradient(90deg, #ff0000, #ffff00); animation: pulseBar 0.2s infinite; }
     @keyframes pulseBar { 0%{opacity:1;} 50%{opacity:0.7;} 100%{opacity:1;} }
@@ -195,7 +205,9 @@
     .locked-fortune { color: #999; font-size: 14px; font-style: italic; }
     .btn-fortune { background: linear-gradient(45deg, #ff9a9e, #fad0c4); color: white; width: 100%; animation: pulse 1.5s infinite; border: none; }
     .fortune-msg { font-size: 15px; color: #d48806; font-weight: bold; animation: popUp 0.5s; line-height: 1.4; word-break: keep-all;}
-    .sound-toggle { position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; z-index: 30; background: rgba(255,255,255,0.5); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; }
+    
+    /* 🔥 [수정됨] 사운드 버튼 위치 조정 (UI와 겹치지 않게) */
+    .sound-toggle { position: absolute; top: 80px; right: 20px; font-size: 24px; cursor: pointer; z-index: 30; background: rgba(255,255,255,0.5); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; }
 
     .rank-form { display: flex; gap: 5px; margin-top: 10px; flex-shrink: 0; }
     .rank-input { flex: 1; padding: 10px; border: 2px solid #ddd; border-radius: 10px; font-weight: bold; }
@@ -223,19 +235,15 @@
 
 <div class="app">
   <div class="top-container">
-    <div class="topbar">
-      <div class="app-title">🏃 Dopamine</div>
-      <div class="info-group">
-          <div class="coin-badge">💰 <span id="userCoins">0</span></div>
-          <div class="score-board">
-            <div class="score-row"><span>🏆</span> <span class="score-val" id="bestScore">0</span></div>
-            <div class="score-row"><span>🏃</span> <span class="score-val" id="currentScore">0</span></div>
-          </div>
-      </div>
+    <div class="coin-badge">💰 <span id="userCoins">0</span></div>
+    <div class="score-board">
+        <div class="score-row"><span>🏆 최고</span> <span class="score-val" id="bestScore">0</span></div>
+        <div class="score-row"><span>⚡ 현재</span> <span class="score-val" id="currentScore">0</span></div>
     </div>
-    <div class="fever-bar-bg">
-        <div id="feverBar" class="fever-bar-fill"></div>
-    </div>
+  </div>
+
+  <div class="fever-bar-bg">
+    <div id="feverBar" class="fever-bar-fill"></div>
   </div>
 
   <div class="stage" id="gameStage">
@@ -252,7 +260,8 @@
         
         <div class="options-group">
           <span class="label">캐릭터 (기본 / 가챠 / 랭킹)</span>
-          <div class="chips" id="charOptions"></div>
+          <div class="chips" id="charOptions">
+            </div>
         </div>
         
         <div class="options-group">
@@ -275,11 +284,13 @@
             <h2>🏪 스킨 상점</h2>
             <p>코인으로 랜덤 스킨을 뽑아보세요!<br>(중복 시 300코인 환급)</p>
             <div class="label">보유 코인: 💰 <span id="shopCoins">0</span></div>
+            
             <div class="shop-area">
                 <div id="gachaBox" class="shop-box" onclick="drawGacha()"></div>
                 <div id="gachaResult" class="gacha-msg"></div>
                 <button class="btn-primary" onclick="drawGacha()">🎲 500코인 뽑기</button>
             </div>
+
             <div style="margin-top:15px;">
                 <button class="btn-secondary" onclick="closeShop()">↩️ 나가기</button>
             </div>
@@ -363,7 +374,7 @@
   const gachaResult = document.getElementById('gachaResult');
 
   let myChar = { type: 'image', val: 'dog.png' }; 
-  let myBg = "bg-pink"; // 기본 배경
+  let myBg = "bg-pink"; 
   let selectedBgType = 'bg-pink'; 
   let isSpecialTheme = false; 
 
@@ -424,7 +435,7 @@
   updatePlayerImage();
   checkHiddenUnlock(); 
   
-  // 초기 배경 설정 (기본 분홍)
+  // 초기 배경 설정
   document.body.classList.add('bg-pink');
 
   function updateCoinUI() {
@@ -553,21 +564,15 @@
   function stopBGM() { if (window.bgmInterval) clearInterval(window.bgmInterval); }
   soundBtn.addEventListener('click', (e) => { e.stopPropagation(); isMuted = !isMuted; soundBtn.innerText = isMuted ? "🔇" : "🔊"; if(isMuted) stopBGM(); else if(isRunning) playBGM(); });
 
-  // 🔥 [수정] 배경 선택 함수 (이미지 클래스 적용)
   function selectBg(className, color, element) {
     selectedBgType = className;
     
-    // 칩 선택 UI 갱신
     document.querySelectorAll('#bgOptions .chip').forEach(opt => opt.classList.remove('selected'));
     element.classList.add('selected');
     
-    // 기존 배경 클래스 초기화
     document.body.className = ''; 
-    
-    // 이미지 배경 적용
     document.body.classList.add(className);
     
-    // 일반 테마가 아님을 표시
     isSpecialTheme = true;
   }
 
@@ -668,7 +673,7 @@
   }
 
   function startGame() {
-    initAudio(); playBGM();   
+    initAudio(); playBGM();    
     startOverlay.classList.add('hidden'); gameOverOverlay.classList.add('hidden');
     rankingOverlay.classList.add('hidden'); shopOverlay.classList.add('hidden');
     // 게임 시작 시 기본 배경(분홍)으로 초기화하지 않고, 선택된 배경 유지
