@@ -1,4 +1,4 @@
-<!doctype html>
+\<!doctype html>
 <html lang="ko">
 <head>
   <meta charset="utf-8" />
@@ -11,7 +11,7 @@
   <link rel="manifest" href="site.webmanifest" />
   <meta name="apple-mobile-web-app-title" content="Dopamine Runner" />
 
-  <title>Dopamine Runner: Clean UI</title>
+  <title>Dopamine Runner: Transparent UI</title>
   
   <style>
     @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css");
@@ -33,17 +33,14 @@
       transition: background-image 0.5s ease-in-out; 
     }
 
-    /* 🔥 배경 이미지 매핑 (제공해주신 파일명 기준 1:1 매칭) */
+    /* 🔥 배경 이미지 매핑 */
     body.bg-pink { background-image: url('bg_pink.png') !important; color: #333; }
     body.bg-sky { background-image: url('bg_sky.png') !important; color: #333; }
     body.bg-green { background-image: url('bg_green.png') !important; color: #333; }
     body.sunset { background-image: url('bg_sunset.png') !important; color: white !important; }
-    body.night { background-image: url('bg_midnight.png') !important; color: white !important; } /* 심해 */
+    body.night { background-image: url('bg_midnight.png') !important; color: white !important; }
     body.space { background-image: url('bg_space.png') !important; color: white !important; }
-    body.aurora { 
-        background-image: url('bg_aurora.png') !important; 
-        color: white !important; 
-    }
+    body.aurora { background-image: url('bg_aurora.png') !important; color: white !important; }
     
     body.fever-mode { 
         position: relative;
@@ -59,22 +56,22 @@
 
     .app{ width: 100%; height: 100%; position:relative; display: flex; flex-direction: column; }
     
-    /* 📱 [수정됨] 상단 UI 컨테이너: 흰색 바 제거 및 양쪽 끝 정렬 */
+    /* 📱 상단 UI 컨테이너 */
     .top-container { 
-        position: absolute; /* 화면 위에 둥둥 뜨게 */
+        position: absolute; 
         top: 0; left: 0; right: 0;
         padding: 15px; 
         z-index: 20; 
         display: flex; 
         justify-content: space-between; 
         align-items: flex-start;
-        pointer-events: none; /* UI 빈 공간 터치 시 게임 조작 가능하도록 */
+        pointer-events: none; 
     }
     
     /* 코인 배지 (왼쪽) */
     .coin-badge { 
         background: #FFD700; color: #333; 
-        padding: 8px 12px; border-radius: 20px; 
+        padding: 8px 14px; border-radius: 20px; 
         font-size: 14px; font-weight: 800; 
         box-shadow: 0 4px 6px rgba(0,0,0,0.2); 
         display: flex; align-items: center; gap: 5px;
@@ -83,26 +80,27 @@
         pointer-events: auto;
     }
 
-    /* 점수판 (오른쪽) */
+    /* 🔥 [수정됨] 점수판 (오른쪽) - 반투명 적용 */
     .score-board {
-        background: rgba(255, 255, 255, 0.9); /* 반투명 흰색 */
-        backdrop-filter: blur(4px);
-        padding: 8px 12px; border-radius: 15px;
+        background: rgba(255, 255, 255, 0.4); /* 투명도 40%로 낮춤 */
+        backdrop-filter: blur(8px); /* 블러 효과 추가 (유리 느낌) */
+        padding: 8px 14px; border-radius: 15px;
         box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         display: flex; flex-direction: column;
         justify-content: center;
         min-width: 90px;
-        border: 2px solid rgba(255,255,255,0.5);
+        border: 1px solid rgba(255, 255, 255, 0.4); /* 테두리도 반투명 */
         pointer-events: auto;
     }
     .score-row { font-size: 12px; display: flex; justify-content: space-between; align-items: center; gap: 8px; line-height: 1.3; }
-    .score-row span:first-child { opacity: 0.7; font-size: 11px; font-weight: bold; }
-    .score-val { font-weight: 900; color: #333; font-size: 15px; }
+    .score-row span:first-child { opacity: 0.8; font-size: 11px; font-weight: bold; }
+    .score-val { font-weight: 900; color: #333; font-size: 15px; text-shadow: 0 0 2px rgba(255,255,255,0.8); }
 
-    /* 피버바 (점수판 아래가 아닌 상단 중앙 쯤 배치하거나, 원래 위치 유지하되 absolute로) */
+    /* 🔥 [수정됨] 피버바 위치 조정 */
     .fever-bar-bg { 
         position: absolute; 
-        top: 70px; left: 20px; right: 20px; 
+        top: 100px; /* UI와 겹치지 않게 충분히 내림 (기존 70px -> 100px) */
+        left: 20px; right: 20px; 
         height: 8px; background: rgba(0,0,0,0.2); 
         border-radius: 10px; overflow: hidden; 
         border: 2px solid rgba(255,255,255,0.5); 
@@ -119,10 +117,9 @@
     @keyframes shakeAnim { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-4px, 0, 0); } 40%, 60% { transform: translate3d(4px, 0, 0); } }
     @keyframes smashShake { 0% { transform: translate(0,0); } 25% { transform: translate(5px, 5px); } 50% { transform: translate(-5px, -5px); } 75% { transform: translate(5px, -5px); } 100% { transform: translate(0,0); } }
 
-    /* 바닥 스타일 조정 (배경 이미지와 어울리게) */
     .ground{ 
         position: absolute; bottom:0; width: 100%; height: var(--ground-height); 
-        background: rgba(255,255,255,0.3); /* 반투명하게 */
+        background: rgba(255,255,255,0.3); 
         border-top: 2px solid rgba(255,255,255,0.5);
         backdrop-filter: blur(2px);
     }
@@ -205,9 +202,7 @@
     .locked-fortune { color: #999; font-size: 14px; font-style: italic; }
     .btn-fortune { background: linear-gradient(45deg, #ff9a9e, #fad0c4); color: white; width: 100%; animation: pulse 1.5s infinite; border: none; }
     .fortune-msg { font-size: 15px; color: #d48806; font-weight: bold; animation: popUp 0.5s; line-height: 1.4; word-break: keep-all;}
-    
-    /* 🔥 [수정됨] 사운드 버튼 위치 조정 (UI와 겹치지 않게) */
-    .sound-toggle { position: absolute; top: 80px; right: 20px; font-size: 24px; cursor: pointer; z-index: 30; background: rgba(255,255,255,0.5); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; }
+    .sound-toggle { position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; z-index: 30; background: rgba(255,255,255,0.5); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; }
 
     .rank-form { display: flex; gap: 5px; margin-top: 10px; flex-shrink: 0; }
     .rank-input { flex: 1; padding: 10px; border: 2px solid #ddd; border-radius: 10px; font-weight: bold; }
@@ -237,11 +232,11 @@
   <div class="top-container">
     <div class="coin-badge">💰 <span id="userCoins">0</span></div>
     <div class="score-board">
-        <div class="score-row"><span>🏆 최고</span> <span class="score-val" id="bestScore">0</span></div>
-        <div class="score-row"><span>⚡ 현재</span> <span class="score-val" id="currentScore">0</span></div>
+      <div class="score-row"><span>🏆</span> <span class="score-val" id="bestScore">0</span></div>
+      <div class="score-row"><span>🏃</span> <span class="score-val" id="currentScore">0</span></div>
     </div>
   </div>
-
+  
   <div class="fever-bar-bg">
     <div id="feverBar" class="fever-bar-fill"></div>
   </div>
@@ -260,8 +255,7 @@
         
         <div class="options-group">
           <span class="label">캐릭터 (기본 / 가챠 / 랭킹)</span>
-          <div class="chips" id="charOptions">
-            </div>
+          <div class="chips" id="charOptions"></div>
         </div>
         
         <div class="options-group">
@@ -284,13 +278,11 @@
             <h2>🏪 스킨 상점</h2>
             <p>코인으로 랜덤 스킨을 뽑아보세요!<br>(중복 시 300코인 환급)</p>
             <div class="label">보유 코인: 💰 <span id="shopCoins">0</span></div>
-            
             <div class="shop-area">
                 <div id="gachaBox" class="shop-box" onclick="drawGacha()"></div>
                 <div id="gachaResult" class="gacha-msg"></div>
                 <button class="btn-primary" onclick="drawGacha()">🎲 500코인 뽑기</button>
             </div>
-
             <div style="margin-top:15px;">
                 <button class="btn-secondary" onclick="closeShop()">↩️ 나가기</button>
             </div>
