@@ -1254,6 +1254,8 @@
     const BG_UNLOCK_MIDNIGHT = 1500;
     const BG_UNLOCK_SPACE = 2000;
     const BG_UNLOCK_AURORA = 2500;
+    const UNLOCK_SCORE_TIGER = 1000;
+    const UNLOCK_SCORE_DRAGON = 2000;
 
     let cooldownTimer = 0;
 
@@ -1397,7 +1399,7 @@
       element.classList.add('selected');
       document.body.className = '';
       document.body.classList.add(className);
-      isSpecialTheme = true;
+      isSpecialTheme = !['bg-pink', 'bg-sky', 'bg-green'].includes(className);
     }
 
     function checkHiddenUnlock() {
@@ -1483,13 +1485,14 @@
       rankList.innerHTML = '<div style="text-align:center; color:#999; padding:20px;">로딩 중...</div>';
       if (SCRIPT_URL.includes("붙여넣으세요")) return rankList.innerHTML = "<div>랭킹 서버 미연결</div>";
       fetch(SCRIPT_URL).then(res => res.json()).then(data => {
+        function escapeHTML(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
         let html = "";
         data.forEach(item => {
           let medal = "";
           if (item.rank === 1) medal = "🥇"; else if (item.rank === 2) medal = "🥈"; else if (item.rank === 3) medal = "🥉";
-          else medal = `<span style="display:inline-block;width:15px;text-align:center;">${item.rank}</span>`;
-          const displayName = (item.name && item.name.trim() !== "") ? item.name : "익명";
-          html += `<div class="rank-item"><div style="display:flex;align-items:center;width:70%;">${medal} <span class="rank-name" style="margin-left:5px;">${displayName}</span></div><span class="rank-score">${item.score}점</span></div>`;
+          else medal = `<span style="display:inline-block;width:15px;text-align:center;">${Number(item.rank)}</span>`;
+          const displayName = (item.name && item.name.trim() !== "") ? escapeHTML(item.name) : "익명";
+          html += `<div class="rank-item"><div style="display:flex;align-items:center;width:70%;">${medal} <span class="rank-name" style="margin-left:5px;">${displayName}</span></div><span class="rank-score">${Number(item.score)}점</span></div>`;
         });
         if (data.length === 0) html = "<div style='text-align:center;padding:10px;'>아직 등록된 랭킹이 없습니다.</div>";
         rankList.innerHTML = html;
@@ -1500,11 +1503,9 @@
       initAudio(); playBGM();
       startOverlay.classList.add('hidden'); gameOverOverlay.classList.add('hidden');
       rankingOverlay.classList.add('hidden'); shopOverlay.classList.add('hidden');
-      // 게임 시작 시 기본 배경(분홍)으로 초기화하지 않고, 선택된 배경 유지
-      if (!isSpecialTheme) {
-        document.body.className = "bg-pink";
-      }
-      // 특수 테마가 선택된 경우(night 등)는 그대로 유지
+      // 게임 시작 시 선택된 배경 유지
+      document.body.className = '';
+      document.body.classList.add(selectedBgType);
 
       isRunning = true; score = 0; gameSpeed = 7.5; frameCount = 0;
       obstacles = []; items = []; trails = [];
@@ -1581,9 +1582,12 @@
       if (!isRunning) return;
       isFever = false; gameSpeed = originalSpeed + 0.5; feverGauge = 0; updateFeverUI();
       player.classList.remove('giant'); document.body.classList.remove('fever-mode');
-      // 피버 종료 시 원래 테마로 복귀 (특별한 점수 구간 아니면 선택한 배경 유지)
-      if (score >= 2000) { document.body.classList.add('space'); }
+      // 피버 종료 시 원래 테마로 복귀
+      if (isSpecialTheme) {
+        document.body.classList.add(selectedBgType);
+      } else if (score >= 2000) { document.body.classList.add('space'); }
       else if (score >= 600) { document.body.classList.add('night'); }
+      else { document.body.classList.add(selectedBgType); }
     }
 
     // 🚀 [수정] 60FPS 고정 루프
